@@ -136,5 +136,4 @@ The server will start at **`http://127.0.0.1:5000`** 🚀
 
 ---
 🚀 **Now, you're ready to run and test your anomaly detection system!**  
-Would you like to **deploy this project on a cloud server (AWS/Heroku)?** 🌐🚀
 
