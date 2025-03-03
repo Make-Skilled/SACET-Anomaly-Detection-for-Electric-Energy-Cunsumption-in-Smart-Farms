@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Consumption Forecast</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100">
+    
+    <!-- Navigation Bar -->
+    <nav class="bg-blue-600 p-4 text-white shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/dashboard" class="text-2xl font-bold">Energy Dashboard</a>
+            <div>
+                <a href="/dashboard" class="mx-4 hover:underline">Dashboard</a>
+                <a href="/anomalie" class="mx-4 hover:underline">Check Anomaly</a>
+                <a href="/anomalies" class="mx-4 hover:underline">View Anomalies</a>
+                <a href="/forecast" class="mx-4 hover:underline">Forecast</a>
+                <a href="/real-time-monitoring" class="mx-4 hover:underline">Real-Time Monitoring</a>
+                <a href="/historical_data_page" class="mx-4 hover:underline">Machine History</a>
+                <a href="/logout" class="mx-4 bg-red-500 px-4 py-2 rounded hover:bg-red-700">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
+        <h1 class="text-3xl font-bold text-center text-purple-600">24-Hour Energy Consumption Forecast</h1>
+
+        <div class="mt-6 text-center">
+            <button id="forecastButton" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-700">
+                Show 24-Hour Forecast
+            </button>
+        </div>
+
+        <div class="mt-6">
+            <canvas id="forecastChart" width="400" height="200"></canvas>
+        </div>
+
+        <!-- Recommendations Section -->
+        <div id="recommendations" class="mt-6 p-4 bg-gray-200 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold">Energy Recommendations</h2>
+            <ul id="recommendationList" class="list-disc pl-6 mt-2 text-gray-700"></ul>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("forecastButton").addEventListener("click", function() {
+            fetch("/get_forecast")
+            .then(response => response.json())
+            .then(data => {
+                let labels = data.map(forecast => forecast.timestamp);
+                let values = data.map(forecast => forecast.predicted_usage);
+
+                let ctx = document.getElementById("forecastChart").getContext("2d");
+                new Chart(ctx, {
+                    type: "line",
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: "Predicted Energy Usage (kWh)",
+                            data: values,
+                            borderColor: "rgba(75, 192, 192, 1)",
+                            backgroundColor: "rgba(75, 192, 192, 0.2)",
+                            borderWidth: 2,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { title: { display: true, text: "Time" } },
+                            y: { title: { display: true, text: "Power Usage (kWh)" } }
+                        }
+                    }
+                });
+
+                // Generate Recommendations
+                let recommendationList = document.getElementById("recommendationList");
+                recommendationList.innerHTML = "";
+                data.forEach(forecast => {
+                    let recommendation;
+                    if (forecast.predicted_usage > 350) {
+                        recommendation = "Reduce energy consumption during peak hours.";
+                    } else if (forecast.predicted_usage < 200) {
+                        recommendation = "Maintain efficiency and avoid unnecessary usage.";
+                    } else {
+                        recommendation = "Energy usage is optimal.";
+                    }
+                    let listItem = document.createElement("li");
+                    listItem.textContent = `${forecast.timestamp}: ${recommendation}`;
+                    recommendationList.appendChild(listItem);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

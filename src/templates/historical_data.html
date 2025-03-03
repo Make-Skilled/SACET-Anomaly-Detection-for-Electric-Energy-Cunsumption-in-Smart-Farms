@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historical Power Usage</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Navigation Bar -->
+    <nav class="bg-blue-600 p-4 text-white shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/dashboard" class="text-2xl font-bold">Energy Dashboard</a>
+            <div>
+                <a href="/dashboard" class="mx-4 hover:underline">Dashboard</a>
+                <a href="/anomalie" class="mx-4 hover:underline">Check Anomaly</a>
+                <a href="/anomalies" class="mx-4 hover:underline">View Anomalies</a>
+                <a href="/forecast" class="mx-4 hover:underline">Forecast</a>
+                <a href="/real-time-monitoring" class="mx-4 hover:underline">Real-Time Monitoring</a>
+                <a href="/historical_data_page" class="mx-4 hover:underline">Machine History</a>
+                <a href="/logout" class="mx-4 bg-red-500 px-4 py-2 rounded hover:bg-red-700">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="max-w-6xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
+        <h1 class="text-3xl font-bold text-center text-blue-600">Historical Power Usage</h1>
+
+        <!-- Data Table -->
+        <div class="mt-6 overflow-x-auto">
+            <table class="min-w-full bg-white border border-gray-300">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="border p-2">Timestamp</th>
+                        <th class="border p-2">Power Usage (kWh)</th>
+                    </tr>
+                </thead>
+                <tbody id="historicalDataTable">
+                    <!-- Data will be inserted here dynamically -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Line Chart -->
+        <div class="mt-6">
+            <canvas id="historicalChart"></canvas>
+        </div>
+
+        <a href="/dashboard" class="block text-center mt-6 text-blue-500">Back to Dashboard</a>
+    </div>
+
+    <script>
+        fetch("/historical_data")
+        .then(response => response.json())
+        .then(data => {
+            let tableBody = document.getElementById("historicalDataTable");
+            let timestamps = [];
+            let powerValues = [];
+
+            data.forEach(entry => {
+                // Insert data into the table
+                let row = `<tr class="text-center">
+                                <td class="border p-2">${entry.timestamp}</td>
+                                <td class="border p-2">${entry.power_usage}</td>
+                           </tr>`;
+                tableBody.innerHTML += row;
+
+                // Collect data for chart
+                timestamps.push(entry.timestamp);
+                powerValues.push(entry.power_usage);
+            });
+
+            // Render Chart
+            let ctx = document.getElementById("historicalChart").getContext("2d");
+            new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: timestamps.reverse(),  // Show oldest first
+                    datasets: [{
+                        label: "Power Usage (kWh)",
+                        data: powerValues.reverse(),
+                        borderColor: "blue",
+                        backgroundColor: "rgba(0, 0, 255, 0.1)",
+                        borderWidth: 2,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            ticks: { autoSkip: true, maxTicksLimit: 10 }
+                        },
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
