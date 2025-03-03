@@ -132,7 +132,7 @@ The server will start at **`http://127.0.0.1:5000`** 🚀
 ---
 
 ## 🙌 Contributors
-👤 **Your Name** - [GitHub Profile](https://github.com/your-username)  
+👤 **Madhu Parvathaneni** - [GitHub Profile](https://github.com/maddydevgits)  
 
 ---
 🚀 **Now, you're ready to run and test your anomaly detection system!**  
